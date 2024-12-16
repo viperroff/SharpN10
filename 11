@@ -1,0 +1,108 @@
+using System; 
+using System.Collections.Generic; 
+ 
+public class CStudent : IComparable<CStudent> 
+{ 
+    public string FullName { get; set; } 
+    public string GroupNumber { get; set; } 
+ 
+    public CStudent(string fullName, string groupNumber) 
+    { 
+        FullName = fullName; 
+        GroupNumber = groupNumber; 
+    } 
+ 
+    // Переопределение метода сравнения по ФИО 
+    public override bool Equals(object obj) 
+    { 
+        if (obj is CStudent other) 
+        { 
+            return this.FullName == other.FullName; 
+        } 
+        return false; 
+    } 
+ 
+    public override int GetHashCode() 
+    { 
+        return FullName.GetHashCode(); 
+    } 
+ 
+    public static bool operator ==(CStudent a, CStudent b) 
+    { 
+        if (ReferenceEquals(a, b)) return true; 
+        if (ReferenceEquals(a, null) || ReferenceEquals(b, null)) return false; 
+        return a.FullName == b.FullName; 
+    } 
+ 
+    public static bool operator !=(CStudent a, CStudent b) 
+    { 
+        return !(a == b); 
+    } 
+ 
+    // Реализация IComparable для сортировки по ФИО 
+    public int CompareTo(CStudent other) 
+    { 
+        if (other == null) return 1; 
+        return this.FullName.CompareTo(other.FullName); 
+    } 
+ 
+    // Сравнение по номеру группы и ФИО 
+    public class GroupAndNameComparer : IComparer<CStudent> 
+    { 
+        public int Compare(CStudent x, CStudent y) 
+        { 
+            if (x.GroupNumber == y.GroupNumber) 
+            { 
+                return x.FullName.CompareTo(y.FullName); 
+            } 
+            return x.GroupNumber.CompareTo(y.GroupNumber); 
+        } 
+    } 
+} 
+ 
+class Program 
+{ 
+    static void Main(string[] args) 
+    { 
+        // Создание массива студентов 
+        CStudent[] students = new CStudent[] 
+        { 
+            new CStudent("Иванов Иван Иванович", "101"), 
+            new CStudent("Петров Петр Петрович", "102"), 
+            new CStudent("Сидоров Сидор Сидорович", "101"), 
+            new CStudent("Алексеев Алексей Алексеевич", "103") 
+        }; 
+ 
+        // Сортировка по ФИО 
+        Array.Sort(students); 
+        Console.WriteLine("Сортировка по ФИО:"); 
+        foreach (var student in students) 
+        { 
+            Console.WriteLine($"{student.FullName}, Группа: {student.GroupNumber}"); 
+        } 
+ 
+        // Сортировка по номеру группы и ФИО 
+        Array.Sort(students, new CStudent.GroupAndNameComparer()); 
+        Console.WriteLine("\nСортировка по номеру группы и ФИО:"); 
+        foreach (var student in students) 
+        { 
+            Console.WriteLine($"{student.FullName}, Группа: {student.GroupNumber}"); 
+        } 
+ 
+        // Удаление студента по ФИО 
+        string fullNameToRemove = "Петров Петр Петрович"; 
+        students = RemoveStudentByFullName(students, fullNameToRemove); 
+        Console.WriteLine($"\nСтуденты после удаления {fullNameToRemove}:"); 
+        foreach (var student in students) 
+        { 
+            Console.WriteLine($"{student.FullName}, Группа: {student.GroupNumber}"); 
+        } 
+    } 
+ 
+    static CStudent[] RemoveStudentByFullName(CStudent[] students, string fullName) 
+    { 
+        List<CStudent> studentList = new List<CStudent>(students); 
+        studentList.RemoveAll(s => s.FullName == fullName); 
+        return studentList.ToArray(); 
+    } 
+}
